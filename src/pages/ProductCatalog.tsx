@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ShoppingCart, Star, Plus, Minus, Users } from "lucide-react";
+import { Search, ShoppingCart, Star, Plus, Users } from "lucide-react";
 import { RetailerSidebar } from "@/components/catalog/RetailerSidebar";
 import { CartSidebar } from "@/components/catalog/CartSidebar";
 
@@ -98,6 +98,11 @@ const ProductCatalog = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isRetailerSidebarOpen, setIsRetailerSidebarOpen] = useState(false);
 
+  console.log("ProductCatalog rendered with cart:", cart);
+  console.log("Selected retailer:", selectedRetailer);
+  console.log("Cart open:", isCartOpen);
+  console.log("Retailer sidebar open:", isRetailerSidebarOpen);
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || product.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -105,6 +110,8 @@ const ProductCatalog = () => {
   });
 
   const addToCart = (product, quantity = 1) => {
+    console.log("Adding to cart:", product, "Quantity:", quantity);
+    
     if (!selectedRetailer) {
       alert("Please select a retailer first");
       return;
@@ -113,17 +120,23 @@ const ProductCatalog = () => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
-        return prevCart.map(item =>
+        const updatedCart = prevCart.map(item =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
+        console.log("Updated cart:", updatedCart);
+        return updatedCart;
       }
-      return [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
+      const newCart = [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
+      console.log("New cart:", newCart);
+      return newCart;
     });
   };
 
   const updateCartQuantity = (productId, newQuantity) => {
+    console.log("Updating cart quantity:", productId, newQuantity);
+    
     if (newQuantity <= 0) {
       setCart(prevCart => prevCart.filter(item => item.id !== productId));
     } else {
@@ -147,13 +160,19 @@ const ProductCatalog = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-background">
       {/* Retailer Sidebar */}
       <RetailerSidebar 
         selectedRetailer={selectedRetailer}
-        onRetailerSelect={setSelectedRetailer}
+        onRetailerSelect={(retailer) => {
+          console.log("Retailer selected:", retailer);
+          setSelectedRetailer(retailer);
+        }}
         isOpen={isRetailerSidebarOpen}
-        onToggle={() => setIsRetailerSidebarOpen(!isRetailerSidebarOpen)}
+        onToggle={() => {
+          console.log("Toggling retailer sidebar");
+          setIsRetailerSidebarOpen(!isRetailerSidebarOpen);
+        }}
       />
 
       {/* Main Content */}
@@ -175,15 +194,22 @@ const ProductCatalog = () => {
             <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
-                onClick={() => setIsRetailerSidebarOpen(!isRetailerSidebarOpen)}
+                onClick={() => {
+                  console.log("Opening retailer sidebar");
+                  setIsRetailerSidebarOpen(!isRetailerSidebarOpen);
+                }}
+                className="flex items-center"
               >
                 <Users className="w-4 h-4 mr-2" />
                 {selectedRetailer || "Select Retailer"}
               </Button>
 
               <Button
-                onClick={() => setIsCartOpen(true)}
-                className="portal-gradient text-white relative"
+                onClick={() => {
+                  console.log("Opening cart");
+                  setIsCartOpen(true);
+                }}
+                className="portal-gradient text-white relative flex items-center"
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Cart
@@ -260,7 +286,10 @@ const ProductCatalog = () => {
                       size="sm" 
                       disabled={!product.inStock || !selectedRetailer}
                       className="portal-gradient text-white"
-                      onClick={() => addToCart(product)}
+                      onClick={() => {
+                        console.log("Add to cart clicked for:", product.name);
+                        addToCart(product);
+                      }}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add to Cart
@@ -276,7 +305,10 @@ const ProductCatalog = () => {
       {/* Cart Sidebar */}
       <CartSidebar 
         isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
+        onClose={() => {
+          console.log("Closing cart");
+          setIsCartOpen(false);
+        }}
         cart={cart}
         onUpdateQuantity={updateCartQuantity}
         totalAmount={getTotalAmount()}

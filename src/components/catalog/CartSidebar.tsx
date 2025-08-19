@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,8 @@ export function CartSidebar({ isOpen, onClose, cart, onUpdateQuantity, totalAmou
   const [deliveryMode, setDeliveryMode] = useState("");
   const [notes, setNotes] = useState("");
 
+  console.log("CartSidebar rendered - isOpen:", isOpen, "cart:", cart);
+
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
       alert("Cart is empty");
@@ -42,7 +44,6 @@ export function CartSidebar({ isOpen, onClose, cart, onUpdateQuantity, totalAmou
       return;
     }
 
-    // Here you would typically send the order to your backend
     const order = {
       retailer: selectedRetailer,
       items: cart,
@@ -65,7 +66,7 @@ export function CartSidebar({ isOpen, onClose, cart, onUpdateQuantity, totalAmou
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-      <div className="w-96 bg-white h-full flex flex-col">
+      <div className="w-96 bg-white h-full flex flex-col shadow-xl">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900 flex items-center">

@@ -74,6 +74,8 @@ export function RetailerSidebar({ selectedRetailer, onRetailerSelect, isOpen, on
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  console.log("RetailerSidebar rendered - isOpen:", isOpen);
+
   const filteredRetailers = retailers.filter(retailer => {
     const matchesSearch = retailer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          retailer.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -92,7 +94,7 @@ export function RetailerSidebar({ selectedRetailer, onRetailerSelect, isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-lg">
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-900">Select Retailer</h3>
@@ -145,7 +147,10 @@ export function RetailerSidebar({ selectedRetailer, onRetailerSelect, isOpen, on
             className={`cursor-pointer transition-all hover:shadow-md ${
               selectedRetailer === retailer.name ? 'ring-2 ring-primary' : ''
             }`}
-            onClick={() => onRetailerSelect(retailer.name)}
+            onClick={() => {
+              console.log("Retailer clicked:", retailer.name);
+              onRetailerSelect(retailer.name);
+            }}
           >
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
