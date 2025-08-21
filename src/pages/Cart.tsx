@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -138,12 +137,12 @@ const Cart = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <ShoppingCart className="w-24 h-24 mx-auto mb-6 text-muted-foreground opacity-50" />
-          <h2 className="text-2xl font-semibold text-muted-foreground mb-2">Your cart is empty</h2>
-          <p className="text-muted-foreground mb-6">Add some products to get started</p>
-          <Button onClick={() => navigate('/catalog')} className="portal-gradient text-white">
+      <div className="h-full w-full flex items-center justify-center p-4">
+        <div className="text-center py-12 max-w-md mx-auto">
+          <ShoppingCart className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 text-muted-foreground opacity-50" />
+          <h2 className="text-xl sm:text-2xl font-semibold text-muted-foreground mb-2">Your cart is empty</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">Add some products to get started</p>
+          <Button onClick={() => navigate('/catalog')} className="portal-gradient text-white w-full sm:w-auto">
             Continue Shopping
           </Button>
         </div>
@@ -152,243 +151,251 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
-      <div className="flex items-center mb-6 sm:mb-8">
-        <ShoppingCart className="w-6 h-6 mr-3" />
-        <h1 className="text-2xl sm:text-3xl font-bold">Shopping Cart</h1>
-      </div>
+    <div className="h-full w-full p-3 sm:p-4 lg:p-6 overflow-auto">
+      <div className="w-full max-w-none mx-auto">
+        <div className="flex items-center mb-4 sm:mb-6">
+          <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Shopping Cart</h1>
+        </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-        {/* Cart Items */}
-        <div className="xl:col-span-2 space-y-4">
-          {cart.map((item) => {
-            const itemTotal = calculateItemTotal(item);
-            const originalPrice = parseInt(item.dealerPrice.replace(/[₹,]/g, '')) * item.quantity;
-            const hasBulkDiscount = item.scheme?.inScheme && item.scheme.bulkDiscount && item.quantity >= item.scheme.bulkDiscount.minQuantity;
-            
-            return (
-              <Card key={item.id}>
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full sm:w-20 h-20 object-cover rounded"
-                    />
-                    <div className="flex-1 w-full">
-                      <h3 className="font-semibold text-lg">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">{item.category} • {item.size}</p>
-                      <p className="text-lg font-medium text-primary mt-1">{item.dealerPrice}</p>
-                      {hasBulkDiscount && (
-                        <Badge className="bg-green-100 text-green-700 mt-2">
-                          {item.scheme!.bulkDiscount!.discountPercent}% Bulk Discount Applied
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col sm:items-end w-full sm:w-auto">
-                      <div className="flex items-center justify-between sm:justify-end space-x-3 mb-2 w-full">
-                        <div className="flex items-center space-x-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+            {cart.map((item) => {
+              const itemTotal = calculateItemTotal(item);
+              const originalPrice = parseInt(item.dealerPrice.replace(/[₹,]/g, '')) * item.quantity;
+              const hasBulkDiscount = item.scheme?.inScheme && item.scheme.bulkDiscount && item.quantity >= item.scheme.bulkDiscount.minQuantity;
+              
+              return (
+                <Card key={item.id} className="w-full">
+                  <CardContent className="p-3 sm:p-4 lg:p-6">
+                    <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-full sm:w-16 lg:w-20 h-16 lg:h-20 object-cover rounded"
+                      />
+                      <div className="flex-1 w-full min-w-0">
+                        <h3 className="font-semibold text-base sm:text-lg truncate">{item.name}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{item.category} • {item.size}</p>
+                        <p className="text-base sm:text-lg font-medium text-primary mt-1">{item.dealerPrice}</p>
+                        {hasBulkDiscount && (
+                          <Badge className="bg-green-100 text-green-700 mt-2 text-xs">
+                            {item.scheme!.bulkDiscount!.discountPercent}% Bulk Discount Applied
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                        <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
                             className="w-8 h-8 p-0"
                           >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
                           </Button>
-                          <span className="font-medium w-12 text-center">{item.quantity}</span>
+                          <span className="font-medium w-8 text-center text-sm sm:text-base">{item.quantity}</span>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
                             className="w-8 h-8 p-0"
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                           </Button>
                         </div>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => updateCartQuantity(item.id, 0)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 w-8 h-8 p-0"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
+                        <div className="text-right">
+                          {hasBulkDiscount && (
+                            <p className="text-xs sm:text-sm text-gray-500 line-through">
+                              ₹{originalPrice.toLocaleString()}
+                            </p>
+                          )}
+                          <p className="text-base sm:text-lg font-semibold">
+                            ₹{itemTotal.toLocaleString()}
+                          </p>
+                        </div>
                       </div>
-                      {hasBulkDiscount && (
-                        <p className="text-sm text-gray-500 line-through text-right">
-                          ₹{originalPrice.toLocaleString()}
-                        </p>
-                      )}
-                      <p className="text-lg font-semibold text-right">
-                        ₹{itemTotal.toLocaleString()}
-                      </p>
                     </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Retailer Info & Delivery Address & Order Summary */}
+          <div className="space-y-4 sm:space-y-6">
+            {/* Retailer Information */}
+            {selectedRetailerDetails && (
+              <Card>
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center text-base sm:text-lg">
+                    <Building className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    Retailer Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm sm:text-base">{selectedRetailerDetails.name}</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground flex items-center">
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 shrink-0" />
+                      <span className="truncate">{selectedRetailerDetails.location}</span>
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{selectedRetailerDetails.phone}</p>
+                    {selectedRetailerDetails.address && (
+                      <p className="text-xs sm:text-sm">{selectedRetailerDetails.address}</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            )}
 
-        {/* Retailer Info & Delivery Address & Order Summary */}
-        <div className="space-y-6">
-          {/* Retailer Information */}
-          {selectedRetailerDetails && (
+            {/* Delivery Address */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building className="w-5 h-5 mr-2" />
-                  Retailer Information
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="flex items-center justify-between text-base sm:text-lg">
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    Delivery Address
+                  </div>
+                  {selectedRetailerDetails && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={useRetailerAddress}
+                      className="text-xs h-8"
+                    >
+                      Use Retailer
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <h4 className="font-semibold">{selectedRetailerDetails.name}</h4>
-                  <p className="text-sm text-muted-foreground flex items-center">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {selectedRetailerDetails.location}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{selectedRetailerDetails.phone}</p>
-                  {selectedRetailerDetails.address && (
-                    <p className="text-sm">{selectedRetailerDetails.address}</p>
-                  )}
+              <CardContent className="space-y-3 sm:space-y-4 pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label htmlFor="name" className="text-xs sm:text-sm">Full Name *</Label>
+                    <Input
+                      id="name"
+                      value={deliveryAddress.name}
+                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter full name"
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone" className="text-xs sm:text-sm">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      value={deliveryAddress.phone}
+                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Enter phone number"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="address" className="text-xs sm:text-sm">Address *</Label>
+                  <Textarea
+                    id="address"
+                    value={deliveryAddress.address}
+                    onChange={(e) => setDeliveryAddress(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="Enter complete address"
+                    rows={2}
+                    className="text-sm resize-none"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label htmlFor="city" className="text-xs sm:text-sm">City</Label>
+                    <Input
+                      id="city"
+                      value={deliveryAddress.city}
+                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Enter city"
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state" className="text-xs sm:text-sm">State</Label>
+                    <Input
+                      id="state"
+                      value={deliveryAddress.state}
+                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, state: e.target.value }))}
+                      placeholder="Enter state"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="pincode" className="text-xs sm:text-sm">PIN Code</Label>
+                  <Input
+                    id="pincode"
+                    value={deliveryAddress.pincode}
+                    onChange={(e) => setDeliveryAddress(prev => ({ ...prev, pincode: e.target.value }))}
+                    placeholder="Enter PIN code"
+                    className="text-sm"
+                  />
                 </div>
               </CardContent>
             </Card>
-          )}
 
-          {/* Delivery Address */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  Delivery Address
-                </div>
-                {selectedRetailerDetails && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={useRetailerAddress}
-                    className="text-xs"
-                  >
-                    Use Retailer Address
-                  </Button>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    value={deliveryAddress.name}
-                    onChange={(e) => setDeliveryAddress(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter full name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    value={deliveryAddress.phone}
-                    onChange={(e) => setDeliveryAddress(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="Enter phone number"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="address">Address *</Label>
-                <Textarea
-                  id="address"
-                  value={deliveryAddress.address}
-                  onChange={(e) => setDeliveryAddress(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Enter complete address"
-                  rows={3}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={deliveryAddress.city}
-                    onChange={(e) => setDeliveryAddress(prev => ({ ...prev, city: e.target.value }))}
-                    placeholder="Enter city"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    value={deliveryAddress.state}
-                    onChange={(e) => setDeliveryAddress(prev => ({ ...prev, state: e.target.value }))}
-                    placeholder="Enter state"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="pincode">PIN Code</Label>
-                <Input
-                  id="pincode"
-                  value={deliveryAddress.pincode}
-                  onChange={(e) => setDeliveryAddress(prev => ({ ...prev, pincode: e.target.value }))}
-                  placeholder="Enter PIN code"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Order Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-                  <span>₹{(getSubtotal() + getBulkDiscountAmount()).toLocaleString()}</span>
-                </div>
-                
-                {getBulkDiscountAmount() > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Bulk Discount</span>
-                    <span>-₹{getBulkDiscountAmount().toLocaleString()}</span>
+            {/* Order Summary */}
+            <Card>
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="text-base sm:text-lg">Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 sm:space-y-4 pt-0">
+                <div className="space-y-2 text-xs sm:text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                    <span>₹{(getSubtotal() + getBulkDiscountAmount()).toLocaleString()}</span>
                   </div>
-                )}
-                
-                <div className="flex justify-between">
-                  <span>After Discounts</span>
-                  <span>₹{getSubtotal().toLocaleString()}</span>
+                  
+                  {getBulkDiscountAmount() > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Bulk Discount</span>
+                      <span>-₹{getBulkDiscountAmount().toLocaleString()}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between">
+                    <span>After Discounts</span>
+                    <span>₹{getSubtotal().toLocaleString()}</span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span>GST (18%)</span>
+                    <span>₹{getGSTAmount().toLocaleString()}</span>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex justify-between items-center text-base sm:text-lg font-semibold">
+                    <span>Total Amount:</span>
+                    <span className="text-lg sm:text-2xl text-primary">
+                      ₹{getFinalTotal().toLocaleString()}
+                    </span>
+                  </div>
                 </div>
-                
-                <div className="flex justify-between">
-                  <span>GST (18%)</span>
-                  <span>₹{getGSTAmount().toLocaleString()}</span>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total Amount:</span>
-                  <span className="text-2xl text-primary">
-                    ₹{getFinalTotal().toLocaleString()}
-                  </span>
-                </div>
-              </div>
 
-              <Button 
-                className="w-full portal-gradient text-white h-12"
-                onClick={handlePlaceOrder}
-              >
-                <CreditCard className="w-4 h-4 mr-2" />
-                Place Order
-              </Button>
-            </CardContent>
-          </Card>
+                <Button 
+                  className="w-full portal-gradient text-white h-10 sm:h-12 text-sm sm:text-base"
+                  onClick={handlePlaceOrder}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Place Order
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
