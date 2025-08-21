@@ -9,7 +9,9 @@ import {
   Target,
   Settings,
   Building2,
-  ClipboardCheck
+  ClipboardCheck,
+  Users,
+  Shield
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -28,8 +30,10 @@ const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Product Catalog", url: "/catalog", icon: Package },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
+  { title: "Customers", url: "/customers", icon: Users },
   { title: "GRN Process", url: "/grn", icon: ClipboardCheck },
   { title: "Inventory", url: "/inventory", icon: Warehouse },
+  { title: "Warranty Registration", url: "/warranty", icon: Shield },
   { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Targets", url: "/targets", icon: Target },
   { title: "Invoices", url: "/invoices", icon: FileText },

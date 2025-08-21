@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Eye, Download, Plus } from "lucide-react";
+import { OrderDetailDialog } from "@/components/orders/OrderDetailDialog";
 
 const orders = [
   {
@@ -49,6 +49,8 @@ const orders = [
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState<typeof orders[0] | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,6 +77,11 @@ const Orders = () => {
       case 'unpaid': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleViewOrder = (order: typeof orders[0]) => {
+    setSelectedOrder(order);
+    setIsDetailDialogOpen(true);
   };
 
   return (
@@ -167,7 +174,11 @@ const Orders = () => {
                     </td>
                     <td>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewOrder(order)}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="outline">
@@ -182,6 +193,15 @@ const Orders = () => {
           </div>
         </CardContent>
       </Card>
+
+      <OrderDetailDialog
+        order={selectedOrder}
+        isOpen={isDetailDialogOpen}
+        onClose={() => {
+          setIsDetailDialogOpen(false);
+          setSelectedOrder(null);
+        }}
+      />
     </div>
   );
 };
