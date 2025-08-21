@@ -12,6 +12,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import ProductCatalog from "./pages/ProductCatalog";
 import Orders from "./pages/Orders";
+import GRN from "./pages/GRN";
 import Inventory from "./pages/Inventory";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
@@ -44,6 +45,7 @@ const App = () => {
               <Route index element={<Dashboard />} />
               <Route path="catalog" element={<ProductCatalog />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="grn" element={<GRN />} />
               <Route path="inventory" element={<Inventory />} />
               <Route path="reports" element={<Reports />} />
               <Route path="targets" element={<Navigate to="/" replace />} />

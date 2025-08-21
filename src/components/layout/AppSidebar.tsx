@@ -8,7 +8,8 @@ import {
   FileText,
   Target,
   Settings,
-  Building2
+  Building2,
+  ClipboardCheck
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -27,6 +28,7 @@ const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Product Catalog", url: "/catalog", icon: Package },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
+  { title: "GRN Process", url: "/grn", icon: ClipboardCheck },
   { title: "Inventory", url: "/inventory", icon: Warehouse },
   { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Targets", url: "/targets", icon: Target },
