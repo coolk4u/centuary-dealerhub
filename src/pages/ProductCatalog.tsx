@@ -1,13 +1,15 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ShoppingCart, Star, Plus, Users } from "lucide-react";
-import { RetailerSidebar } from "@/components/catalog/RetailerSidebar";
-import { CartSidebar } from "@/components/catalog/CartSidebar";
+import { Search, ShoppingCart, Star, Plus, Users, Filter, Grid, List } from "lucide-react";
+import { ProductGrid } from "@/components/catalog/ProductGrid";
+import { ProductList } from "@/components/catalog/ProductList";
+import { RetailerSelector } from "@/components/catalog/RetailerSelector";
+import { CartDrawer } from "@/components/catalog/CartDrawer";
+import { FilterSidebar } from "@/components/catalog/FilterSidebar";
 
 const products = [
   {
@@ -18,10 +20,11 @@ const products = [
     price: "₹25,000",
     dealerPrice: "₹18,750",
     rating: 4.5,
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop",
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop",
     inStock: true,
     description: "Premium orthopedic mattress with memory foam",
-    specifications: "Dimensions: 78x60x8 inches, Material: Memory Foam"
+    specifications: "Dimensions: 78x60x8 inches, Material: Memory Foam",
+    discount: "25% OFF"
   },
   {
     id: 2,
@@ -31,10 +34,11 @@ const products = [
     price: "₹35,000",
     dealerPrice: "₹26,250",
     rating: 4.8,
-    image: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=300&h=200&fit=crop",
+    image: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=400&h=300&fit=crop",
     inStock: true,
     description: "Luxury memory foam with cooling gel technology",
-    specifications: "Dimensions: 84x72x10 inches, Material: Gel Memory Foam"
+    specifications: "Dimensions: 84x72x10 inches, Material: Gel Memory Foam",
+    discount: "25% OFF"
   },
   {
     id: 3,
@@ -44,10 +48,11 @@ const products = [
     price: "₹3,000",
     dealerPrice: "₹2,250",
     rating: 4.3,
-    image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&h=200&fit=crop",
+    image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop",
     inStock: false,
     description: "Set of 2 premium memory foam pillows",
-    specifications: "Dimensions: 26x16x5 inches, Material: Memory Foam"
+    specifications: "Dimensions: 26x16x5 inches, Material: Memory Foam",
+    discount: "15% OFF"
   },
   {
     id: 4,
@@ -57,7 +62,7 @@ const products = [
     price: "₹18,000",
     dealerPrice: "₹13,500",
     rating: 4.2,
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=300&h=200&fit=crop",
+    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=300&fit=crop",
     inStock: true,
     description: "Traditional spring mattress with comfort layers",
     specifications: "Dimensions: 75x48x8 inches, Material: Bonnell Spring"
@@ -70,7 +75,7 @@ const products = [
     price: "₹22,000",
     dealerPrice: "₹16,500",
     rating: 4.6,
-    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=200&fit=crop",
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop",
     inStock: true,
     description: "Natural latex mattress for ultimate comfort",
     specifications: "Dimensions: 75x36x6 inches, Material: Natural Latex"
@@ -83,7 +88,7 @@ const products = [
     price: "₹2,500",
     dealerPrice: "₹1,875",
     rating: 4.4,
-    image: "https://images.unsplash.com/photo-1584467735815-f778f274e296?w=300&h=200&fit=crop",
+    image: "https://images.unsplash.com/photo-1584467735815-f778f274e296?w=400&h=300&fit=crop",
     inStock: true,
     description: "Ergonomic cervical support pillow",
     specifications: "Dimensions: 24x14x4 inches, Material: Contour Foam"
@@ -96,22 +101,33 @@ const ProductCatalog = () => {
   const [selectedRetailer, setSelectedRetailer] = useState("");
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isRetailerSidebarOpen, setIsRetailerSidebarOpen] = useState(false);
-
-  console.log("ProductCatalog rendered with cart:", cart);
-  console.log("Selected retailer:", selectedRetailer);
-  console.log("Cart open:", isCartOpen);
-  console.log("Retailer sidebar open:", isRetailerSidebarOpen);
+  const [viewMode, setViewMode] = useState("grid");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("name");
+  const [priceRange, setPriceRange] = useState([0, 50000]);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || product.category.toLowerCase() === selectedCategory.toLowerCase();
-    return matchesSearch && matchesCategory;
+    const price = parseInt(product.dealerPrice.replace(/[₹,]/g, ''));
+    const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
+    return matchesSearch && matchesCategory && matchesPrice;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "price-low":
+        return parseInt(a.dealerPrice.replace(/[₹,]/g, '')) - parseInt(b.dealerPrice.replace(/[₹,]/g, ''));
+      case "price-high":
+        return parseInt(b.dealerPrice.replace(/[₹,]/g, '')) - parseInt(a.dealerPrice.replace(/[₹,]/g, ''));
+      case "rating":
+        return b.rating - a.rating;
+      default:
+        return a.name.localeCompare(b.name);
+    }
   });
 
   const addToCart = (product, quantity = 1) => {
-    console.log("Adding to cart:", product, "Quantity:", quantity);
-    
     if (!selectedRetailer) {
       alert("Please select a retailer first");
       return;
@@ -120,23 +136,17 @@ const ProductCatalog = () => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
-        const updatedCart = prevCart.map(item =>
+        return prevCart.map(item =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
-        console.log("Updated cart:", updatedCart);
-        return updatedCart;
       }
-      const newCart = [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
-      console.log("New cart:", newCart);
-      return newCart;
+      return [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
     });
   };
 
   const updateCartQuantity = (productId, newQuantity) => {
-    console.log("Updating cart quantity:", productId, newQuantity);
-    
     if (newQuantity <= 0) {
       setCart(prevCart => prevCart.filter(item => item.id !== productId));
     } else {
@@ -160,56 +170,29 @@ const ProductCatalog = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Retailer Sidebar */}
-      <RetailerSidebar 
-        selectedRetailer={selectedRetailer}
-        onRetailerSelect={(retailer) => {
-          console.log("Retailer selected:", retailer);
-          setSelectedRetailer(retailer);
-        }}
-        isOpen={isRetailerSidebarOpen}
-        onToggle={() => {
-          console.log("Toggling retailer sidebar");
-          setIsRetailerSidebarOpen(!isRetailerSidebarOpen);
-        }}
-      />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">Product Catalog</h2>
-              <p className="text-muted-foreground">
-                Browse and order from our complete range of mattresses and accessories.
-              </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-gray-900">Product Catalog</h1>
               {selectedRetailer && (
-                <p className="text-sm text-primary mt-1">
-                  Ordering for: <strong>{selectedRetailer}</strong>
-                </p>
+                <Badge variant="outline" className="text-primary">
+                  {selectedRetailer}
+                </Badge>
               )}
             </div>
 
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  console.log("Opening retailer sidebar");
-                  setIsRetailerSidebarOpen(!isRetailerSidebarOpen);
-                }}
-                className="flex items-center"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                {selectedRetailer || "Select Retailer"}
-              </Button>
+            <div className="flex items-center space-x-3">
+              <RetailerSelector
+                selectedRetailer={selectedRetailer}
+                onRetailerSelect={setSelectedRetailer}
+              />
 
               <Button
-                onClick={() => {
-                  console.log("Opening cart");
-                  setIsCartOpen(true);
-                }}
-                className="portal-gradient text-white relative flex items-center"
+                onClick={() => setIsCartOpen(true)}
+                className="portal-gradient text-white relative"
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Cart
@@ -221,9 +204,13 @@ const ProductCatalog = () => {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Search and Filters Bar */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
               <Input
@@ -233,82 +220,101 @@ const ProductCatalog = () => {
                 className="pl-10"
               />
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="mattress">Mattress</SelectItem>
-                <SelectItem value="pillow">Pillow</SelectItem>
-                <SelectItem value="accessories">Accessories</SelectItem>
-              </SelectContent>
-            </Select>
+
+            <div className="flex items-center space-x-3">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="mattress">Mattress</SelectItem>
+                  <SelectItem value="pillow">Pillow</SelectItem>
+                  <SelectItem value="accessories">Accessories</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+
+              <div className="flex border rounded-lg">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </div>
 
-          {/* Products Grid */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="portal-card overflow-hidden">
-                <div className="aspect-video bg-gray-100 relative">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {!product.inStock && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <Badge variant="secondary">Out of Stock</Badge>
-                    </div>
-                  )}
-                </div>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{product.name}</CardTitle>
-                      <CardDescription>{product.category} • {product.size}</CardDescription>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{product.rating}</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-gray-600">{product.description}</p>
-                  <p className="text-xs text-gray-500">{product.specifications}</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-lg font-bold text-primary">{product.dealerPrice}</p>
-                      <p className="text-sm text-gray-500 line-through">{product.price}</p>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      disabled={!product.inStock || !selectedRetailer}
-                      className="portal-gradient text-white"
-                      onClick={() => {
-                        console.log("Add to cart clicked for:", product.name);
-                        addToCart(product);
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Results Summary */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-600">
+              Showing {sortedProducts.length} of {products.length} products
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex gap-6">
+          {/* Filter Sidebar */}
+          {isFilterOpen && (
+            <FilterSidebar
+              priceRange={priceRange}
+              onPriceRangeChange={setPriceRange}
+              onClose={() => setIsFilterOpen(false)}
+            />
+          )}
+
+          {/* Products */}
+          <div className="flex-1">
+            {viewMode === "grid" ? (
+              <ProductGrid
+                products={sortedProducts}
+                onAddToCart={addToCart}
+                selectedRetailer={selectedRetailer}
+              />
+            ) : (
+              <ProductList
+                products={sortedProducts}
+                onAddToCart={addToCart}
+                selectedRetailer={selectedRetailer}
+              />
+            )}
           </div>
         </div>
       </div>
 
-      {/* Cart Sidebar */}
-      <CartSidebar 
+      {/* Cart Drawer */}
+      <CartDrawer 
         isOpen={isCartOpen}
-        onClose={() => {
-          console.log("Closing cart");
-          setIsCartOpen(false);
-        }}
+        onClose={() => setIsCartOpen(false)}
         cart={cart}
         onUpdateQuantity={updateCartQuantity}
         totalAmount={getTotalAmount()}
