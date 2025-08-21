@@ -1,6 +1,7 @@
 import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, FileText, Target, Settings, Building2, ClipboardCheck, Users, Shield, User } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+
 const menuItems = [{
   title: "Dashboard",
   url: "/",
@@ -46,6 +47,7 @@ const menuItems = [{
   url: "/settings",
   icon: Settings
 }];
+
 export function AppSidebar() {
   const {
     state
@@ -57,7 +59,7 @@ export function AppSidebar() {
     return path !== "/" && location.pathname.startsWith(path);
   };
   return <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarContent className="portal-sidebar border-r-0 bg-sky-600">
+      <SidebarContent className="portal-sidebar border-r-0 bg-gradient-to-b from-blue-600 via-purple-600 to-purple-700">
         <div className="p-4 border-b border-white/10">
           <div className="flex items-center space-x-3">
             <div className="bg-white/20 w-8 h-8 rounded-lg flex items-center justify-center">
