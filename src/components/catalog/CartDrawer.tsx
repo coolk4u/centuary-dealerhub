@@ -2,34 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { X, Plus, Minus, ShoppingCart, CreditCard, Trash2, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { Plus, Minus, ShoppingCart, CreditCard, Trash2, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
-
-interface CartItem {
-  id: number;
-  name: string;
-  dealerPrice: string;
-  quantity: number;
-  image: string;
-  retailer: string;
-  category: string;
-  size: string;
-  scheme?: {
-    inScheme: boolean;
-    bulkDiscount?: {
-      minQuantity: number;
-      discountPercent: number;
-      message: string;
-    } | null;
-  };
-}
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  cart: CartItem[];
+  cart: any[];
   onUpdateQuantity: (productId: number, quantity: number) => void;
   totalAmount: number;
   selectedRetailer: string;
@@ -38,9 +19,10 @@ interface CartDrawerProps {
 export function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, totalAmount, selectedRetailer }: CartDrawerProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const GST_RATE = 0.18; // 18% GST
+  const { clearCart } = useCart();
+  const GST_RATE = 0.18;
 
-  const calculateItemTotal = (item: CartItem) => {
+  const calculateItemTotal = (item: any) => {
     let basePrice = parseInt(item.dealerPrice.replace(/[₹,]/g, '')) * item.quantity;
     
     // Apply bulk discount if applicable
@@ -103,7 +85,7 @@ export function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, totalAmoun
     });
     
     // Clear cart after successful order
-    cart.forEach(item => onUpdateQuantity(item.id, 0));
+    clearCart();
     onClose();
   };
 

@@ -10,6 +10,7 @@ import { ProductList } from "@/components/catalog/ProductList";
 import { RetailerSelector } from "@/components/catalog/RetailerSelector";
 import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { FilterSidebar } from "@/components/catalog/FilterSidebar";
+import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 
 const products = [
@@ -139,14 +140,22 @@ const products = [
 const ProductCatalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedRetailer, setSelectedRetailer] = useState("");
-  const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState("name");
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const { toast } = useToast();
+
+  const {
+    cart,
+    selectedRetailer,
+    setSelectedRetailer,
+    addToCart: contextAddToCart,
+    updateCartQuantity,
+    getTotalItems,
+    getTotalAmount
+  } = useCart();
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -179,70 +188,33 @@ const ProductCatalog = () => {
       return;
     }
 
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
-      let newCart;
-      
-      if (existingItem) {
-        newCart = prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        newCart = [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
-      }
+    contextAddToCart(product, quantity);
 
-      // Check for bulk discounts after adding item
-      const updatedItem = newCart.find(item => item.id === product.id);
-      if (updatedItem && product.scheme?.inScheme && product.scheme.bulkDiscount) {
-        const { minQuantity, discountPercent, message } = product.scheme.bulkDiscount;
-        if (updatedItem.quantity >= minQuantity) {
-          // Show bulk discount notification
+    // Check for bulk discounts after adding item
+    const existingItem = cart.find(item => item.id === product.id);
+    const newQuantity = existingItem ? existingItem.quantity + quantity : quantity;
+    
+    if (product.scheme?.inScheme && product.scheme.bulkDiscount) {
+      const { minQuantity, discountPercent, message } = product.scheme.bulkDiscount;
+      if (newQuantity >= minQuantity) {
+        setTimeout(() => {
+          toast({
+            title: "🎉 Bulk Discount Applied!",
+            description: `${message} - You're getting ${discountPercent}% extra discount on ${product.name}`,
+          });
+        }, 100);
+      } else {
+        const remaining = minQuantity - newQuantity;
+        if (remaining <= 3) {
           setTimeout(() => {
             toast({
-              title: "🎉 Bulk Discount Applied!",
-              description: `${message} - You're getting ${discountPercent}% extra discount on ${product.name}`,
+              title: "💡 Almost there!",
+              description: `Add ${remaining} more ${product.name} to get ${discountPercent}% extra discount!`,
             });
           }, 100);
-        } else {
-          const remaining = minQuantity - updatedItem.quantity;
-          if (remaining <= 3) {
-            setTimeout(() => {
-              toast({
-                title: "💡 Almost there!",
-                description: `Add ${remaining} more ${product.name} to get ${discountPercent}% extra discount!`,
-              });
-            }, 100);
-          }
         }
       }
-
-      return newCart;
-    });
-  };
-
-  const updateCartQuantity = (productId, newQuantity) => {
-    if (newQuantity <= 0) {
-      setCart(prevCart => prevCart.filter(item => item.id !== productId));
-    } else {
-      setCart(prevCart =>
-        prevCart.map(item =>
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        )
-      );
     }
-  };
-
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getTotalAmount = () => {
-    return cart.reduce((total, item) => {
-      const price = parseInt(item.dealerPrice.replace(/[₹,]/g, ''));
-      return total + (price * item.quantity);
-    }, 0);
   };
 
   return (

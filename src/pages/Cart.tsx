@@ -7,27 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MapPin, User } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MapPin } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
-
-interface CartItem {
-  id: number;
-  name: string;
-  dealerPrice: string;
-  quantity: number;
-  image: string;
-  retailer: string;
-  category: string;
-  size: string;
-  scheme?: {
-    inScheme: boolean;
-    bulkDiscount?: {
-      minQuantity: number;
-      discountPercent: number;
-      message: string;
-    } | null;
-  };
-}
 
 interface DeliveryAddress {
   name: string;
@@ -40,7 +22,7 @@ interface DeliveryAddress {
 
 const Cart = () => {
   const { toast } = useToast();
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { cart, updateCartQuantity, clearCart } = useCart();
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     name: "",
     phone: "",
@@ -52,7 +34,7 @@ const Cart = () => {
 
   const GST_RATE = 0.18;
 
-  const calculateItemTotal = (item: CartItem) => {
+  const calculateItemTotal = (item) => {
     let basePrice = parseInt(item.dealerPrice.replace(/[₹,]/g, '')) * item.quantity;
     
     if (item.scheme?.inScheme && item.scheme.bulkDiscount && item.quantity >= item.scheme.bulkDiscount.minQuantity) {
@@ -84,18 +66,6 @@ const Cart = () => {
 
   const getFinalTotal = () => {
     return getSubtotal() + getGSTAmount();
-  };
-
-  const updateQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      setCart(prevCart => prevCart.filter(item => item.id !== productId));
-    } else {
-      setCart(prevCart =>
-        prevCart.map(item =>
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
   };
 
   const handlePlaceOrder = () => {
@@ -135,7 +105,7 @@ const Cart = () => {
     });
     
     // Clear cart after successful order
-    setCart([]);
+    clearCart();
     setDeliveryAddress({
       name: "",
       phone: "",
@@ -200,7 +170,7 @@ const Cart = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
                           className="w-8 h-8 p-0"
                         >
                           <Minus className="w-4 h-4" />
@@ -209,7 +179,7 @@ const Cart = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
                           className="w-8 h-8 p-0"
                         >
                           <Plus className="w-4 h-4" />
@@ -217,7 +187,7 @@ const Cart = () => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => updateQuantity(item.id, 0)}
+                          onClick={() => updateCartQuantity(item.id, 0)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
