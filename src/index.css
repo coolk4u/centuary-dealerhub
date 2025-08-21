@@ -35,9 +35,11 @@
 
     --radius: 0.75rem;
 
-    /* Custom dealer portal colors - Purple theme */
+    /* Custom dealer portal colors - Purple/Blue theme */
     --portal-gradient-from: 250 84% 54%;
     --portal-gradient-to: 270 91% 65%;
+    --portal-sidebar: 250 84% 54%;
+    --portal-sidebar-foreground: 0 0% 100%;
     --portal-success: 142 76% 36%;
     --portal-warning: 38 92% 50%;
     --portal-info: 217 91% 60%;
@@ -66,6 +68,8 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 250 84% 54%;
     --portal-surface-light: 217.2 32.6% 17.5%;
+    --portal-sidebar: 250 84% 54%;
+    --portal-sidebar-foreground: 0 0% 100%;
   }
 }
 
@@ -88,6 +92,10 @@
 
   .portal-surface {
     @apply bg-[hsl(var(--portal-surface-light))] border border-border rounded-lg;
+  }
+
+  .portal-sidebar {
+    @apply bg-[hsl(var(--portal-sidebar))] text-[hsl(var(--portal-sidebar-foreground))];
   }
 }
 
@@ -117,15 +125,15 @@
   }
 
   .sidebar-item {
-    @apply flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150;
+    @apply flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 text-white/80 hover:text-white;
   }
 
   .sidebar-item:hover {
-    @apply bg-accent/10;
+    @apply bg-white/10;
   }
 
   .sidebar-item.active {
-    @apply bg-primary text-primary-foreground;
+    @apply bg-white/20 text-white font-semibold;
   }
 
   .data-table {

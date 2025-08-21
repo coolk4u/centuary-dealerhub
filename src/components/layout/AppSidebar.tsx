@@ -46,23 +46,23 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarContent className="bg-white border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200">
+      <SidebarContent className="portal-sidebar border-r-0">
+        <div className="p-4 border-b border-white/10">
           <div className="flex items-center space-x-3">
-            <div className="portal-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+            <div className="bg-white/20 w-8 h-8 rounded-lg flex items-center justify-center">
               <Building2 className="w-4 h-4 text-white" />
             </div>
             {!isCollapsed && (
               <div>
-                <h2 className="font-bold text-gray-900">Centuary</h2>
-                <p className="text-xs text-gray-500">Dealer Portal</p>
+                <h2 className="font-bold text-white">Centuary</h2>
+                <p className="text-xs text-white/70">Dealer Portal</p>
               </div>
             )}
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/60 text-xs uppercase tracking-wider">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
