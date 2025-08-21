@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Plus, Heart, Eye } from "lucide-react";
+import { Star, Plus, Heart, Eye, Percent } from "lucide-react";
 
 interface Product {
   id: number;
@@ -17,6 +17,14 @@ interface Product {
   description: string;
   specifications: string;
   discount?: string;
+  scheme?: {
+    inScheme: boolean;
+    bulkDiscount?: {
+      minQuantity: number;
+      discountPercent: number;
+      message: string;
+    } | null;
+  };
 }
 
 interface ProductGridProps {
@@ -37,12 +45,18 @@ export function ProductGrid({ products, onAddToCart, selectedRetailer }: Product
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             
-            {/* Discount Badge */}
-            {product.discount && (
-              <div className="absolute top-3 left-3">
+            {/* Badges */}
+            <div className="absolute top-3 left-3 flex flex-col space-y-1">
+              {product.discount && (
                 <Badge className="bg-red-500 text-white">{product.discount}</Badge>
-              </div>
-            )}
+              )}
+              {product.scheme?.inScheme && (
+                <Badge className="bg-green-500 text-white">
+                  <Percent className="w-3 h-3 mr-1" />
+                  In Scheme
+                </Badge>
+              )}
+            </div>
 
             {/* Quick Actions */}
             <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -79,6 +93,15 @@ export function ProductGrid({ products, onAddToCart, selectedRetailer }: Product
 
           <CardContent className="space-y-3">
             <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+            
+            {/* Bulk Discount Info */}
+            {product.scheme?.inScheme && product.scheme.bulkDiscount && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                <p className="text-xs text-green-700 font-medium">
+                  {product.scheme.bulkDiscount.message}
+                </p>
+              </div>
+            )}
             
             <div className="space-y-2">
               <div className="flex items-baseline space-x-2">

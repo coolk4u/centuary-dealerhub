@@ -24,7 +24,15 @@ const products = [
     inStock: true,
     description: "Premium orthopedic mattress with memory foam",
     specifications: "Dimensions: 78x60x8 inches, Material: Memory Foam",
-    discount: "25% OFF"
+    discount: "25% OFF",
+    scheme: {
+      inScheme: true,
+      bulkDiscount: {
+        minQuantity: 5,
+        discountPercent: 5,
+        message: "Buy 5+ get 5% extra discount"
+      }
+    }
   },
   {
     id: 2,
@@ -38,7 +46,15 @@ const products = [
     inStock: true,
     description: "Luxury memory foam with cooling gel technology",
     specifications: "Dimensions: 84x72x10 inches, Material: Gel Memory Foam",
-    discount: "25% OFF"
+    discount: "25% OFF",
+    scheme: {
+      inScheme: true,
+      bulkDiscount: {
+        minQuantity: 3,
+        discountPercent: 7,
+        message: "Buy 3+ get 7% extra discount"
+      }
+    }
   },
   {
     id: 3,
@@ -52,7 +68,11 @@ const products = [
     inStock: false,
     description: "Set of 2 premium memory foam pillows",
     specifications: "Dimensions: 26x16x5 inches, Material: Memory Foam",
-    discount: "15% OFF"
+    discount: "15% OFF",
+    scheme: {
+      inScheme: false,
+      bulkDiscount: null
+    }
   },
   {
     id: 4,
@@ -65,7 +85,15 @@ const products = [
     image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=300&fit=crop",
     inStock: true,
     description: "Traditional spring mattress with comfort layers",
-    specifications: "Dimensions: 75x48x8 inches, Material: Bonnell Spring"
+    specifications: "Dimensions: 75x48x8 inches, Material: Bonnell Spring",
+    scheme: {
+      inScheme: true,
+      bulkDiscount: {
+        minQuantity: 10,
+        discountPercent: 10,
+        message: "Buy 10+ get 10% extra discount"
+      }
+    }
   },
   {
     id: 5,
@@ -78,7 +106,11 @@ const products = [
     image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop",
     inStock: true,
     description: "Natural latex mattress for ultimate comfort",
-    specifications: "Dimensions: 75x36x6 inches, Material: Natural Latex"
+    specifications: "Dimensions: 75x36x6 inches, Material: Natural Latex",
+    scheme: {
+      inScheme: false,
+      bulkDiscount: null
+    }
   },
   {
     id: 6,
@@ -91,7 +123,15 @@ const products = [
     image: "https://images.unsplash.com/photo-1584467735815-f778f274e296?w=400&h=300&fit=crop",
     inStock: true,
     description: "Ergonomic cervical support pillow",
-    specifications: "Dimensions: 24x14x4 inches, Material: Contour Foam"
+    specifications: "Dimensions: 24x14x4 inches, Material: Contour Foam",
+    scheme: {
+      inScheme: true,
+      bulkDiscount: {
+        minQuantity: 6,
+        discountPercent: 8,
+        message: "Buy 6+ get 8% extra discount"
+      }
+    }
   }
 ];
 
@@ -135,14 +175,38 @@ const ProductCatalog = () => {
 
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
+      let newCart;
+      
       if (existingItem) {
-        return prevCart.map(item =>
+        newCart = prevCart.map(item =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
+      } else {
+        newCart = [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
       }
-      return [...prevCart, { ...product, quantity, retailer: selectedRetailer }];
+
+      // Check for bulk discounts after adding item
+      const updatedItem = newCart.find(item => item.id === product.id);
+      if (updatedItem && product.scheme?.inScheme && product.scheme.bulkDiscount) {
+        const { minQuantity, discountPercent, message } = product.scheme.bulkDiscount;
+        if (updatedItem.quantity >= minQuantity) {
+          // Show bulk discount notification
+          setTimeout(() => {
+            alert(`🎉 ${message} applied! You're getting ${discountPercent}% extra discount on ${product.name}`);
+          }, 100);
+        } else {
+          const remaining = minQuantity - updatedItem.quantity;
+          if (remaining <= 3) {
+            setTimeout(() => {
+              alert(`💡 Add ${remaining} more ${product.name} to get ${discountPercent}% extra discount!`);
+            }, 100);
+          }
+        }
+      }
+
+      return newCart;
     });
   };
 

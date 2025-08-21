@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Plus, Heart, Eye } from "lucide-react";
+import { Star, Plus, Heart, Eye, Percent } from "lucide-react";
 
 interface Product {
   id: number;
@@ -17,6 +17,14 @@ interface Product {
   description: string;
   specifications: string;
   discount?: string;
+  scheme?: {
+    inScheme: boolean;
+    bulkDiscount?: {
+      minQuantity: number;
+      discountPercent: number;
+      message: string;
+    } | null;
+  };
 }
 
 interface ProductListProps {
@@ -39,11 +47,17 @@ export function ProductList({ products, onAddToCart, selectedRetailer }: Product
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
-                {product.discount && (
-                  <div className="absolute top-2 left-2">
+                <div className="absolute top-2 left-2 flex flex-col space-y-1">
+                  {product.discount && (
                     <Badge className="bg-red-500 text-white text-xs">{product.discount}</Badge>
-                  </div>
-                )}
+                  )}
+                  {product.scheme?.inScheme && (
+                    <Badge className="bg-green-500 text-white text-xs">
+                      <Percent className="w-3 h-3 mr-1" />
+                      In Scheme
+                    </Badge>
+                  )}
+                </div>
                 {!product.inStock && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <Badge variant="secondary" className="text-white bg-black/70">
@@ -67,7 +81,17 @@ export function ProductList({ products, onAddToCart, selectedRetailer }: Product
                     </div>
                   </div>
 
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                  <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
+                  
+                  {/* Bulk Discount Info */}
+                  {product.scheme?.inScheme && product.scheme.bulkDiscount && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2 mb-3">
+                      <p className="text-xs text-green-700 font-medium">
+                        {product.scheme.bulkDiscount.message}
+                      </p>
+                    </div>
+                  )}
+                  
                   <p className="text-xs text-gray-500 mb-4">{product.specifications}</p>
 
                   <div className="flex items-center justify-between">
