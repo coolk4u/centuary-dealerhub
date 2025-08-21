@@ -20,9 +20,21 @@ interface CartItem {
   };
 }
 
+interface Retailer {
+  id: string;
+  name: string;
+  location: string;
+  phone: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+}
+
 interface CartContextType {
   cart: CartItem[];
   selectedRetailer: string;
+  selectedRetailerDetails: Retailer | null;
   setSelectedRetailer: (retailer: string) => void;
   addToCart: (product: any, quantity?: number) => void;
   updateCartQuantity: (productId: number, newQuantity: number) => void;
@@ -31,11 +43,52 @@ interface CartContextType {
   getTotalAmount: () => number;
 }
 
+const retailers: Retailer[] = [
+  {
+    id: "RET-001",
+    name: "Dream Sleep Center",
+    location: "Mumbai, Maharashtra",
+    phone: "+91 98765 43210",
+    address: "Shop No. 15, Dream Plaza, Linking Road",
+    city: "Mumbai",
+    state: "Maharashtra",
+    pincode: "400050"
+  },
+  {
+    id: "RET-002", 
+    name: "Comfort Zone Mattress",
+    location: "Delhi, NCR",
+    phone: "+91 98765 43211",
+    address: "B-24, Connaught Place",
+    city: "New Delhi",
+    state: "Delhi",
+    pincode: "110001"
+  },
+  {
+    id: "RET-003",
+    name: "Sleep Well Showroom", 
+    location: "Bangalore, Karnataka",
+    phone: "+91 98765 43212",
+    address: "456, MG Road, Brigade Road Junction",
+    city: "Bangalore",
+    state: "Karnataka",
+    pincode: "560001"
+  }
+];
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedRetailer, setSelectedRetailer] = useState("");
+  const [selectedRetailer, setSelectedRetailerState] = useState("");
+
+  const selectedRetailerDetails = selectedRetailer 
+    ? retailers.find(r => r.name === selectedRetailer) || null
+    : null;
+
+  const setSelectedRetailer = (retailer: string) => {
+    setSelectedRetailerState(retailer);
+  };
 
   const addToCart = (product: any, quantity = 1) => {
     setCart(prevCart => {
@@ -84,6 +137,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider value={{
       cart,
       selectedRetailer,
+      selectedRetailerDetails,
       setSelectedRetailer,
       addToCart,
       updateCartQuantity,

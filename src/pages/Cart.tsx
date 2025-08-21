@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MapPin } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MapPin, User, Building } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,15 +22,16 @@ interface DeliveryAddress {
 }
 
 const Cart = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const { cart, updateCartQuantity, clearCart } = useCart();
+  const { cart, updateCartQuantity, clearCart, selectedRetailer, selectedRetailerDetails } = useCart();
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     name: "",
     phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: ""
+    address: selectedRetailerDetails?.address || "",
+    city: selectedRetailerDetails?.city || "",
+    state: selectedRetailerDetails?.state || "",
+    pincode: selectedRetailerDetails?.pincode || ""
   });
 
   const GST_RATE = 0.18;
@@ -68,6 +70,19 @@ const Cart = () => {
     return getSubtotal() + getGSTAmount();
   };
 
+  const useRetailerAddress = () => {
+    if (selectedRetailerDetails) {
+      setDeliveryAddress({
+        name: selectedRetailerDetails.name,
+        phone: selectedRetailerDetails.phone,
+        address: selectedRetailerDetails.address || "",
+        city: selectedRetailerDetails.city || "",
+        state: selectedRetailerDetails.state || "",
+        pincode: selectedRetailerDetails.pincode || ""
+      });
+    }
+  };
+
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
       toast({
@@ -89,6 +104,8 @@ const Cart = () => {
 
     const order = {
       items: cart,
+      retailer: selectedRetailer,
+      retailerDetails: selectedRetailerDetails,
       deliveryAddress,
       subtotal: getSubtotal(),
       bulkDiscount: getBulkDiscountAmount(),
@@ -114,6 +131,9 @@ const Cart = () => {
       state: "",
       pincode: ""
     });
+    
+    // Navigate to orders page
+    navigate('/orders');
   };
 
   if (cart.length === 0) {
@@ -123,7 +143,7 @@ const Cart = () => {
           <ShoppingCart className="w-24 h-24 mx-auto mb-6 text-muted-foreground opacity-50" />
           <h2 className="text-2xl font-semibold text-muted-foreground mb-2">Your cart is empty</h2>
           <p className="text-muted-foreground mb-6">Add some products to get started</p>
-          <Button onClick={() => window.history.back()} className="portal-gradient text-white">
+          <Button onClick={() => navigate('/catalog')} className="portal-gradient text-white">
             Continue Shopping
           </Button>
         </div>
@@ -132,15 +152,15 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="flex items-center mb-8">
+    <div className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
+      <div className="flex items-center mb-6 sm:mb-8">
         <ShoppingCart className="w-6 h-6 mr-3" />
-        <h1 className="text-3xl font-bold">Shopping Cart</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Shopping Cart</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="xl:col-span-2 space-y-4">
           {cart.map((item) => {
             const itemTotal = calculateItemTotal(item);
             const originalPrice = parseInt(item.dealerPrice.replace(/[₹,]/g, '')) * item.quantity;
@@ -148,14 +168,14 @@ const Cart = () => {
             
             return (
               <Card key={item.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
                     <img 
                       src={item.image} 
                       alt={item.name}
-                      className="w-20 h-20 object-cover rounded"
+                      className="w-full sm:w-20 h-20 object-cover rounded"
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                       <h3 className="font-semibold text-lg">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">{item.category} • {item.size}</p>
                       <p className="text-lg font-medium text-primary mt-1">{item.dealerPrice}</p>
@@ -165,25 +185,27 @@ const Cart = () => {
                         </Badge>
                       )}
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
-                          className="w-8 h-8 p-0"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="font-medium w-12 text-center">{item.quantity}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                          className="w-8 h-8 p-0"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
+                    <div className="flex flex-col sm:items-end w-full sm:w-auto">
+                      <div className="flex items-center justify-between sm:justify-end space-x-3 mb-2 w-full">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
+                            className="w-8 h-8 p-0"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </Button>
+                          <span className="font-medium w-12 text-center">{item.quantity}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                            className="w-8 h-8 p-0"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </div>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -194,11 +216,11 @@ const Cart = () => {
                         </Button>
                       </div>
                       {hasBulkDiscount && (
-                        <p className="text-sm text-gray-500 line-through">
+                        <p className="text-sm text-gray-500 line-through text-right">
                           ₹{originalPrice.toLocaleString()}
                         </p>
                       )}
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-right">
                         ₹{itemTotal.toLocaleString()}
                       </p>
                     </div>
@@ -209,18 +231,55 @@ const Cart = () => {
           })}
         </div>
 
-        {/* Order Summary & Delivery Address */}
+        {/* Retailer Info & Delivery Address & Order Summary */}
         <div className="space-y-6">
+          {/* Retailer Information */}
+          {selectedRetailerDetails && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Building className="w-5 h-5 mr-2" />
+                  Retailer Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <h4 className="font-semibold">{selectedRetailerDetails.name}</h4>
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {selectedRetailerDetails.location}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{selectedRetailerDetails.phone}</p>
+                  {selectedRetailerDetails.address && (
+                    <p className="text-sm">{selectedRetailerDetails.address}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Delivery Address */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <MapPin className="w-5 h-5 mr-2" />
-                Delivery Address
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  Delivery Address
+                </div>
+                {selectedRetailerDetails && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={useRetailerAddress}
+                    className="text-xs"
+                  >
+                    Use Retailer Address
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Full Name *</Label>
                   <Input
@@ -250,7 +309,7 @@ const Cart = () => {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="city">City</Label>
                   <Input
