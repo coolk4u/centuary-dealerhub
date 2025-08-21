@@ -6,10 +6,10 @@ import { HeaderNav } from "@/components/layout/HeaderNav";
 
 const DashboardLayout = () => {
   return (
-    <div className="min-h-screen bg-slate-50/50 w-full flex">
+    <div className="min-h-screen bg-slate-50/50 flex w-full">
       <AppSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="flex-1 flex flex-col min-w-0 w-full">
+        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between w-full">
           <div className="flex items-center space-x-4">
             <SidebarTrigger />
             <div>
@@ -18,8 +18,8 @@ const DashboardLayout = () => {
           </div>
           <HeaderNav />
         </header>
-        <main className="flex-1 p-4 sm:p-6 overflow-auto">
-          <div className="max-w-full">
+        <main className="flex-1 p-4 sm:p-6 overflow-auto w-full">
+          <div className="w-full max-w-none">
             <Outlet />
           </div>
         </main>
