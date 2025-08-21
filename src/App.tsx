@@ -17,6 +17,9 @@ import GRN from "./pages/GRN";
 import Inventory from "./pages/Inventory";
 import Warranty from "./pages/Warranty";
 import Reports from "./pages/Reports";
+import Invoices from "./pages/Invoices";
+import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -52,9 +55,10 @@ const App = () => {
               <Route path="inventory" element={<Inventory />} />
               <Route path="warranty" element={<Warranty />} />
               <Route path="reports" element={<Reports />} />
+              <Route path="invoices" element={<Invoices />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="targets" element={<Navigate to="/" replace />} />
-              <Route path="invoices" element={<Navigate to="/" replace />} />
-              <Route path="settings" element={<Navigate to="/" replace />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

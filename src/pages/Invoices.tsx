@@ -1,79 +1,82 @@
 
 import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Eye, Download, Plus, FileText, Send, Printer } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Download, FileText, Calendar, Filter } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const invoices = [
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  date: string;
+  dueDate: string;
+  amount: number;
+  status: 'paid' | 'pending' | 'overdue' | 'cancelled';
+  gstAmount: number;
+  orderNumber: string;
+}
+
+const mockInvoices: Invoice[] = [
   {
-    id: "INV-2024-001",
-    customer: "Dream Sleep Center",
-    customerAddress: "Mumbai, Maharashtra",
+    id: "1",
+    invoiceNumber: "INV-2024-001",
+    customerName: "Sharma Furniture Store",
     date: "2024-01-15",
     dueDate: "2024-02-15",
-    amount: "₹67,500",
+    amount: 67500,
     status: "paid",
-    paymentMethod: "Credit Card",
-    items: [
-      { name: "Ortho Plus Mattress", quantity: 2, price: "₹18,750", total: "₹37,500" },
-      { name: "Memory Foam Deluxe", quantity: 1, price: "₹30,000", total: "₹30,000" }
-    ]
+    gstAmount: 12150,
+    orderNumber: "ORD-001"
   },
   {
-    id: "INV-2024-002",
-    customer: "Comfort Zone Mattress",
-    customerAddress: "Delhi, NCR",
-    date: "2024-01-14",
-    dueDate: "2024-02-14",
-    amount: "₹42,000",
+    id: "2", 
+    invoiceNumber: "INV-2024-002",
+    customerName: "Modern Home Solutions",
+    date: "2024-01-18",
+    dueDate: "2024-02-18",
+    amount: 45000,
     status: "pending",
-    paymentMethod: "Bank Transfer",
-    items: [
-      { name: "Spring Classic", quantity: 2, price: "₹13,500", total: "₹27,000" },
-      { name: "Premium Pillow Set", quantity: 5, price: "₹3,000", total: "₹15,000" }
-    ]
+    gstAmount: 8100,
+    orderNumber: "ORD-002"
   },
   {
-    id: "INV-2024-003",
-    customer: "Sleep Well Showroom",
-    customerAddress: "Bangalore, Karnataka",
-    date: "2024-01-13",
-    dueDate: "2024-02-13",
-    amount: "₹125,000",
+    id: "3",
+    invoiceNumber: "INV-2024-003",
+    customerName: "Elite Mattress Center",
+    date: "2024-01-20",
+    dueDate: "2024-02-20",
+    amount: 125000,
     status: "overdue",
-    paymentMethod: "Cash",
-    items: [
-      { name: "Memory Foam Deluxe", quantity: 3, price: "₹26,250", total: "₹78,750" },
-      { name: "Latex Comfort", quantity: 2, price: "₹16,500", total: "₹33,000" },
-      { name: "Cervical Pillow", quantity: 7, price: "₹1,875", total: "₹13,125" }
-    ]
+    gstAmount: 22500,
+    orderNumber: "ORD-003"
   },
   {
-    id: "INV-2024-004",
-    customer: "Rest Easy Furniture",
-    customerAddress: "Pune, Maharashtra",
-    date: "2024-01-12",
-    dueDate: "2024-02-12",
-    amount: "₹18,750",
-    status: "draft",
-    paymentMethod: "Cheque",
-    items: [
-      { name: "Ortho Plus Mattress", quantity: 1, price: "₹18,750", total: "₹18,750" }
-    ]
+    id: "4",
+    invoiceNumber: "INV-2024-004",
+    customerName: "Sleep Comfort Retailers",
+    date: "2024-01-22",
+    dueDate: "2024-02-22",
+    amount: 89000,
+    status: "paid",
+    gstAmount: 16020,
+    orderNumber: "ORD-004"
   }
 ];
 
 const Invoices = () => {
+  const [invoices] = useState<Invoice[]>(mockInvoices);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedInvoice, setSelectedInvoice] = useState<typeof invoices[0] | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { toast } = useToast();
 
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -83,125 +86,89 @@ const Invoices = () => {
       case 'paid': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'overdue': return 'bg-red-100 text-red-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'cancelled': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const handleViewInvoice = (invoice: typeof invoices[0]) => {
-    setSelectedInvoice(invoice);
+  const handleDownloadInvoice = (invoiceNumber: string) => {
+    console.log("Downloading invoice:", invoiceNumber);
+    toast({
+      title: "Download Started",
+      description: `Invoice ${invoiceNumber} is being downloaded.`,
+    });
   };
 
-  const getTotalAmount = () => {
-    return filteredInvoices.reduce((sum, invoice) => {
-      return sum + parseInt(invoice.amount.replace(/[₹,]/g, ''));
-    }, 0);
-  };
-
-  const getStatusCount = (status: string) => {
-    return invoices.filter(inv => inv.status === status).length;
-  };
+  const totalAmount = filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  const paidAmount = filteredInvoices
+    .filter(invoice => invoice.status === 'paid')
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+  const pendingAmount = filteredInvoices
+    .filter(invoice => invoice.status === 'pending' || invoice.status === 'overdue')
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Invoices</h2>
-          <p className="text-muted-foreground">
-            Manage and track all customer invoices.
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold">Invoices</h1>
         <Button className="portal-gradient text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          New Invoice
+          <FileText className="w-4 h-4 mr-2" />
+          Generate New Invoice
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <FileText className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-                <p className="text-2xl font-bold">{invoices.length}</p>
-              </div>
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Amount</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{totalAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <FileText className="w-4 h-4 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Paid</p>
-                <p className="text-2xl font-bold text-green-600">{getStatusCount('paid')}</p>
-              </div>
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Paid Amount</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">₹{paidAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                <FileText className="w-4 h-4 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">{getStatusCount('pending')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <FileText className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                <p className="text-2xl font-bold">₹{getTotalAmount().toLocaleString()}</p>
-              </div>
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Amount</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">₹{pendingAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="portal-card">
-        <CardHeader>
-          <CardTitle>Filter Invoices</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card>
+        <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search by customer or invoice ID..."
+                placeholder="Search invoices..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
+              <SelectTrigger className="w-48">
+                <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -209,162 +176,53 @@ const Invoices = () => {
       </Card>
 
       {/* Invoices Table */}
-      <Card className="portal-card">
+      <Card>
         <CardHeader>
           <CardTitle>Invoice List</CardTitle>
-          <CardDescription>
-            {filteredInvoices.length} invoices found
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Invoice ID</th>
-                  <th>Customer</th>
-                  <th>Date</th>
-                  <th>Due Date</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Payment Method</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td className="font-mono">{invoice.id}</td>
-                    <td>
-                      <div>
-                        <p className="font-medium">{invoice.customer}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.customerAddress}</p>
-                      </div>
-                    </td>
-                    <td>{new Date(invoice.date).toLocaleDateString()}</td>
-                    <td>{new Date(invoice.dueDate).toLocaleDateString()}</td>
-                    <td className="font-medium">{invoice.amount}</td>
-                    <td>
-                      <Badge className={getStatusColor(invoice.status)}>
-                        {invoice.status}
-                      </Badge>
-                    </td>
-                    <td className="text-sm">{invoice.paymentMethod}</td>
-                    <td>
-                      <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleViewInvoice(invoice)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Send className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Printer className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Invoice Number</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>GST</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredInvoices.map((invoice) => (
+                <TableRow key={invoice.id}>
+                  <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                  <TableCell>{invoice.customerName}</TableCell>
+                  <TableCell>{new Date(invoice.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(invoice.dueDate).toLocaleDateString()}</TableCell>
+                  <TableCell>₹{invoice.amount.toLocaleString()}</TableCell>
+                  <TableCell>₹{invoice.gstAmount.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(invoice.status)}>
+                      {invoice.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadInvoice(invoice.invoiceNumber)}
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
-
-      {/* Invoice Detail Modal would go here */}
-      {selectedInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Invoice Details - {selectedInvoice.id}</CardTitle>
-                <CardDescription>Customer: {selectedInvoice.customer}</CardDescription>
-              </div>
-              <Button variant="ghost" onClick={() => setSelectedInvoice(null)}>
-                ×
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="font-medium mb-2">Invoice Information</h4>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Date:</span> {selectedInvoice.date}</p>
-                    <p><span className="font-medium">Due Date:</span> {selectedInvoice.dueDate}</p>
-                    <p><span className="font-medium">Status:</span> 
-                      <Badge className={`ml-2 ${getStatusColor(selectedInvoice.status)}`}>
-                        {selectedInvoice.status}
-                      </Badge>
-                    </p>
-                    <p><span className="font-medium">Payment Method:</span> {selectedInvoice.paymentMethod}</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Customer Information</h4>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Name:</span> {selectedInvoice.customer}</p>
-                    <p><span className="font-medium">Address:</span> {selectedInvoice.customerAddress}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h4 className="font-medium mb-4">Items</h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2">Product</th>
-                        <th className="text-right py-2">Quantity</th>
-                        <th className="text-right py-2">Price</th>
-                        <th className="text-right py-2">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedInvoice.items.map((item, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="py-2">{item.name}</td>
-                          <td className="text-right py-2">{item.quantity}</td>
-                          <td className="text-right py-2">{item.price}</td>
-                          <td className="text-right py-2 font-medium">{item.total}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colSpan={3} className="text-right py-2 font-medium">Total Amount:</td>
-                        <td className="text-right py-2 font-bold text-lg">{selectedInvoice.amount}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2 mt-6">
-                <Button variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
-                <Button variant="outline">
-                  <Send className="w-4 h-4 mr-2" />
-                  Send Email
-                </Button>
-                <Button variant="outline">
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };

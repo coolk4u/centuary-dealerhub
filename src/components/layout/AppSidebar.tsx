@@ -11,7 +11,8 @@ import {
   Building2,
   ClipboardCheck,
   Users,
-  Shield
+  Shield,
+  User
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -35,8 +36,8 @@ const menuItems = [
   { title: "Inventory", url: "/inventory", icon: Warehouse },
   { title: "Warranty Registration", url: "/warranty", icon: Shield },
   { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Targets", url: "/targets", icon: Target },
   { title: "Invoices", url: "/invoices", icon: FileText },
+  { title: "Profile", url: "/profile", icon: User },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
