@@ -10,6 +10,7 @@ import { ProductList } from "@/components/catalog/ProductList";
 import { RetailerSelector } from "@/components/catalog/RetailerSelector";
 import { CartDrawer } from "@/components/catalog/CartDrawer";
 import { FilterSidebar } from "@/components/catalog/FilterSidebar";
+import { useToast } from "@/hooks/use-toast";
 
 const products = [
   {
@@ -145,6 +146,7 @@ const ProductCatalog = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState("name");
   const [priceRange, setPriceRange] = useState([0, 50000]);
+  const { toast } = useToast();
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -169,7 +171,11 @@ const ProductCatalog = () => {
 
   const addToCart = (product, quantity = 1) => {
     if (!selectedRetailer) {
-      alert("Please select a retailer first");
+      toast({
+        title: "Please select a retailer",
+        description: "You need to select a retailer before adding items to cart.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -194,13 +200,19 @@ const ProductCatalog = () => {
         if (updatedItem.quantity >= minQuantity) {
           // Show bulk discount notification
           setTimeout(() => {
-            alert(`🎉 ${message} applied! You're getting ${discountPercent}% extra discount on ${product.name}`);
+            toast({
+              title: "🎉 Bulk Discount Applied!",
+              description: `${message} - You're getting ${discountPercent}% extra discount on ${product.name}`,
+            });
           }, 100);
         } else {
           const remaining = minQuantity - updatedItem.quantity;
           if (remaining <= 3) {
             setTimeout(() => {
-              alert(`💡 Add ${remaining} more ${product.name} to get ${discountPercent}% extra discount!`);
+              toast({
+                title: "💡 Almost there!",
+                description: `Add ${remaining} more ${product.name} to get ${discountPercent}% extra discount!`,
+              });
             }, 100);
           }
         }

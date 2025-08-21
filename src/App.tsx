@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import ProductCatalog from "./pages/ProductCatalog";
+import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Customers from "./pages/Customers";
 import GRN from "./pages/GRN";
@@ -50,6 +51,7 @@ const App: React.FC = () => {
             }>
               <Route index element={<Dashboard />} />
               <Route path="catalog" element={<ProductCatalog />} />
+              <Route path="cart" element={<Cart />} />
               <Route path="orders" element={<Orders />} />
               <Route path="customers" element={<Customers />} />
               <Route path="grn" element={<GRN />} />

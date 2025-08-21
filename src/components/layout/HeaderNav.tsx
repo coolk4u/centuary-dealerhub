@@ -11,14 +11,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, LogOut, Settings, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Bell, LogOut, Settings, User, ShoppingCart } from "lucide-react";
 
 export function HeaderNav() {
   const navigate = useNavigate();
   const [notifications] = useState(3);
+  const [cartItemsCount] = useState(2); // This should come from your cart state
 
   const handleLogout = () => {
     navigate("/login");
+  };
+
+  const handleCartClick = () => {
+    navigate("/cart");
   };
 
   return (
@@ -28,6 +34,15 @@ export function HeaderNav() {
         {notifications > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {notifications}
+          </span>
+        )}
+      </Button>
+
+      <Button variant="ghost" size="sm" className="relative" onClick={handleCartClick}>
+        <ShoppingCart className="w-4 h-4" />
+        {cartItemsCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {cartItemsCount}
           </span>
         )}
       </Button>

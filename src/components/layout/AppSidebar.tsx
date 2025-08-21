@@ -1,4 +1,5 @@
-import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, FileText, Target, Settings, Building2, ClipboardCheck, Users, Shield, User } from "lucide-react";
+
+import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, FileText, Target, Settings, Building2, ClipboardCheck, Users, Shield, User, ShoppingBag } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 
@@ -11,9 +12,13 @@ const menuItems = [{
   url: "/catalog",
   icon: Package
 }, {
+  title: "Shopping Cart",
+  url: "/cart",
+  icon: ShoppingCart
+}, {
   title: "Orders",
   url: "/orders",
-  icon: ShoppingCart
+  icon: ShoppingBag
 }, {
   title: "Customers",
   url: "/customers",

@@ -1,10 +1,11 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { X, Plus, Minus, ShoppingCart, CreditCard, Trash2 } from "lucide-react";
+import { X, Plus, Minus, ShoppingCart, CreditCard, Trash2, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface CartItem {
   id: number;
@@ -35,6 +36,8 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, totalAmount, selectedRetailer }: CartDrawerProps) {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const GST_RATE = 0.18; // 18% GST
 
   const calculateItemTotal = (item: CartItem) => {
@@ -74,7 +77,11 @@ export function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, totalAmoun
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
-      alert("Cart is empty");
+      toast({
+        title: "Cart is empty",
+        description: "Please add some items to your cart before placing an order.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -89,20 +96,42 @@ export function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, totalAmoun
     };
 
     console.log("Placing order:", order);
-    alert(`Order placed successfully for ${selectedRetailer}! Total: ₹${getFinalTotal().toLocaleString()}`);
+    
+    toast({
+      title: "Order Placed Successfully! 🎉",
+      description: `Order placed for ${selectedRetailer}! Total: ₹${getFinalTotal().toLocaleString()}`,
+    });
     
     // Clear cart after successful order
     cart.forEach(item => onUpdateQuantity(item.id, 0));
     onClose();
   };
 
+  const handleViewCartDetails = () => {
+    onClose();
+    navigate('/cart');
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-full sm:w-96 sm:max-w-96">
         <SheetHeader>
-          <SheetTitle className="flex items-center">
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            Cart ({cart.length} items)
+          <SheetTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Cart ({cart.length} items)
+            </div>
+            {cart.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleViewCartDetails}
+                className="text-primary hover:text-primary/80"
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                Details
+              </Button>
+            )}
           </SheetTitle>
           {selectedRetailer && (
             <p className="text-sm text-muted-foreground">
@@ -230,14 +259,25 @@ export function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, totalAmoun
                 </div>
               </div>
 
-              <Button 
-                className="w-full portal-gradient text-white h-12"
-                onClick={handlePlaceOrder}
-                disabled={!selectedRetailer || cart.length === 0}
-              >
-                <CreditCard className="w-4 h-4 mr-2" />
-                Place Order for {selectedRetailer}
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline"
+                  onClick={handleViewCartDetails}
+                  className="h-12"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+                
+                <Button 
+                  className="portal-gradient text-white h-12"
+                  onClick={handlePlaceOrder}
+                  disabled={!selectedRetailer || cart.length === 0}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Quick Order
+                </Button>
+              </div>
             </div>
           )}
         </div>
